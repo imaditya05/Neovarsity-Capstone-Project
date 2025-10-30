@@ -22,6 +22,9 @@ export default function Home() {
             <Link href="/movies">
               <Button variant="ghost" size="sm">Movies</Button>
             </Link>
+            <Link href="/theaters">
+              <Button variant="ghost" size="sm">Theaters</Button>
+            </Link>
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-muted-foreground">

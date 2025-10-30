@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { createMovie, MovieFormData, GENRES, RATINGS, STATUSES } from '@/lib/movies';
+import { getMyTheaters, Theater } from '@/lib/theaters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +24,8 @@ export default function AddMoviePage() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [castMembers, setCastMembers] = useState<{ name: string; role: string }[]>([]);
   const [producers, setProducers] = useState<string[]>([]);
+  const [theaters, setTheaters] = useState<Theater[]>([]);
+  const [selectedTheater, setSelectedTheater] = useState<string>('');
   
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<MovieFormData>();
 
@@ -31,6 +34,21 @@ export default function AddMoviePage() {
     router.push('/movies');
     return null;
   }
+
+  // Fetch user's theaters
+  useEffect(() => {
+    const fetchTheaters = async () => {
+      if (user?.role === 'theater_owner') {
+        try {
+          const response = await getMyTheaters();
+          setTheaters(response.data);
+        } catch (err) {
+          console.error('Error fetching theaters:', err);
+        }
+      }
+    };
+    fetchTheaters();
+  }, [user]);
 
   const handleGenreToggle = (genre: string) => {
     setSelectedGenres(prev => {
@@ -86,7 +104,8 @@ export default function AddMoviePage() {
         genre: selectedGenres,
         duration: Number(data.duration),
         cast: castMembers.filter(c => c.name && c.role),
-        producers: producers.filter(p => p.trim() !== '')
+        producers: producers.filter(p => p.trim() !== ''),
+        theater: selectedTheater || undefined
       };
 
       await createMovie(movieData);
@@ -235,6 +254,37 @@ export default function AddMoviePage() {
                   </Select>
                   {errors.status && <p className="text-sm text-destructive">{errors.status.message}</p>}
                 </div>
+
+                {/* Theater Selection for Theater Owners */}
+                {user?.role === 'theater_owner' && theaters.length > 0 && (
+                  <div className="space-y-2">
+                    <Label htmlFor="theater">Theater (Optional)</Label>
+                    <Select value={selectedTheater} onValueChange={setSelectedTheater}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select theater" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {theaters.map((theater) => (
+                          <SelectItem key={theater._id} value={theater._id}>
+                            {theater.theaterName} - {theater.address.city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Associate this movie with one of your theaters
+                    </p>
+                  </div>
+                )}
+
+                {user?.role === 'theater_owner' && theaters.length === 0 && (
+                  <div className="p-3 rounded-md bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      You don't have any theaters yet. <Link href="/theaters/add" className="underline font-medium">Create a theater</Link> to associate movies.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Media Links */}

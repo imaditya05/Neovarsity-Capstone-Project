@@ -140,16 +140,9 @@ exports.createMovie = async (req, res) => {
       addedBy: req.user.id
     };
 
-    // If user is theater owner, they can only add to their theater
-    if (req.user.role === 'theater_owner') {
-      if (!theater) {
-        return res.status(400).json({
-          success: false,
-          message: 'Theater owners must specify a theater'
-        });
-      }
-      movieData.theater = theater;
-    } else if (req.user.role === 'admin' && theater) {
+    // If theater is provided, add it to movie data
+    // Note: Theater management system will be built next, making this optional for now
+    if (theater) {
       movieData.theater = theater;
     }
 
