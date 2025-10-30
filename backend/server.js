@@ -37,10 +37,11 @@ app.get('/api/health', (req, res) => {
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
+const movieRoutes = require('./routes/movieRoutes');
 
 // Routes
 app.use('/api/auth', authRoutes);
-// app.use('/api/movies', movieRoutes);
+app.use('/api/movies', movieRoutes);
 // app.use('/api/bookings', bookingRoutes);
 // app.use('/api/theaters', theaterRoutes);
 
