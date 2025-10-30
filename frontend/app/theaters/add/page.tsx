@@ -19,6 +19,7 @@ export default function AddTheaterPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   
   const { register, handleSubmit, formState: { errors } } = useForm<TheaterFormData>();
@@ -40,7 +41,9 @@ export default function AddTheaterPage() {
   };
 
   const onSubmit = async (data: TheaterFormData) => {
+    console.log('Form submitted!', data);
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
@@ -56,9 +59,17 @@ export default function AddTheaterPage() {
         }
       };
 
-      await createTheater(theaterData);
-      router.push('/theaters');
+      console.log('Sending theater data:', theaterData);
+      const response = await createTheater(theaterData);
+      console.log('Theater created successfully:', response);
+      setSuccess('Theater created successfully! It will be visible after admin approval.');
+      
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push('/theaters');
+      }, 2000);
     } catch (err: any) {
+      console.error('Error creating theater:', err);
       setError(err.response?.data?.message || 'Failed to create theater');
     } finally {
       setLoading(false);
@@ -89,10 +100,19 @@ export default function AddTheaterPage() {
             </p>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit, (errors) => {
+              console.log('Form validation errors:', errors);
+              setError('Please fill in all required fields');
+            })} className="space-y-6">
               {error && (
                 <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                   {error}
+                </div>
+              )}
+              
+              {success && (
+                <div className="p-3 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 text-sm">
+                  {success}
                 </div>
               )}
 

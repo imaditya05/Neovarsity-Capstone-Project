@@ -112,6 +112,16 @@ export default function TheatersPage() {
           </form>
         </div>
 
+        {/* Info for Theater Owners */}
+        {isAuthenticated && user?.role === 'theater_owner' && theaters.length > 0 && (
+          <div className="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>Note:</strong> Theaters with "pending" status are awaiting admin approval. 
+              Once approved, they will be visible to all users.
+            </p>
+          </div>
+        )}
+
         {/* Theaters Grid */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -123,10 +133,14 @@ export default function TheatersPage() {
           </div>
         ) : theaters.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-2xl text-muted-foreground mb-4">No theaters found</p>
+            <p className="text-2xl text-muted-foreground mb-4">
+              {isAuthenticated && user?.role === 'theater_owner' 
+                ? "You haven't added any theaters yet" 
+                : "No theaters found"}
+            </p>
             {canAddTheater && (
               <Link href="/theaters/add">
-                <Button>Add Your Theater</Button>
+                <Button>Add Your First Theater</Button>
               </Link>
             )}
           </div>

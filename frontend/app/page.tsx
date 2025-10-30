@@ -114,9 +114,23 @@ export default function Home() {
           <div className="mt-16 p-6 rounded-lg bg-white dark:bg-slate-800 shadow-sm">
             <h3 className="text-2xl font-bold mb-4">Your Dashboard</h3>
             {user.role === 'admin' && (
-              <p className="text-muted-foreground">
-                As an admin, you have full access to manage users, theaters, and movies.
-              </p>
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  As an admin, you have full access to manage users, theaters, and movies.
+                </p>
+                <div className="flex gap-3">
+                  <Link href="/admin/theaters">
+                    <Button variant="outline">
+                      Manage Theaters
+                    </Button>
+                  </Link>
+                  <Link href="/movies">
+                    <Button variant="outline">
+                      Manage Movies
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             )}
             {user.role === 'theater_owner' && (
               <div className="space-y-2">
