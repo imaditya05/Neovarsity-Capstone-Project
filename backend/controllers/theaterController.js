@@ -121,6 +121,10 @@ exports.getTheaterById = async (req, res) => {
 // @access  Private (Theater Owner, Admin)
 exports.createTheater = async (req, res) => {
   try {
+    console.log('=== CREATE THEATER REQUEST ===');
+    console.log('User:', req.user?.email, 'Role:', req.user?.role);
+    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+    
     const theaterData = {
       ...req.body,
       owner: req.user.id
@@ -133,7 +137,9 @@ exports.createTheater = async (req, res) => {
       theaterData.status = 'approved'; // Admin can directly approve
     }
 
+    console.log('Creating theater with data:', JSON.stringify(theaterData, null, 2));
     const theater = await Theater.create(theaterData);
+    console.log('Theater created successfully! ID:', theater._id);
 
     res.status(201).json({
       success: true,
@@ -142,6 +148,11 @@ exports.createTheater = async (req, res) => {
     });
   } catch (error) {
     console.error('Create theater error:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    if (error.errors) {
+      console.error('Validation errors:', error.errors);
+    }
 
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(err => err.message);

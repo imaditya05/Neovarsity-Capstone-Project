@@ -38,7 +38,7 @@ export default function AdminTheatersPage() {
 
   const handleApprove = async (theaterId: string) => {
     try {
-      await api.put(`/api/theaters/${theaterId}/approve`);
+      await api.put(`/api/theaters/${theaterId}/status`, { status: 'approved' });
       fetchTheaters();
     } catch (error) {
       console.error('Error approving theater:', error);
@@ -47,7 +47,7 @@ export default function AdminTheatersPage() {
 
   const handleReject = async (theaterId: string) => {
     try {
-      await api.put(`/api/theaters/${theaterId}/reject`);
+      await api.put(`/api/theaters/${theaterId}/status`, { status: 'rejected' });
       fetchTheaters();
     } catch (error) {
       console.error('Error rejecting theater:', error);
