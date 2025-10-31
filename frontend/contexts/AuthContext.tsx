@@ -74,9 +74,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Redirect based on role
       if (newUser.role === 'admin') {
-        router.push('/admin/dashboard');
+        router.push('/admin/theaters');
       } else if (newUser.role === 'theater_owner') {
-        router.push('/theater/dashboard');
+        router.push('/theaters');
       } else {
         router.push('/');
       }
@@ -95,8 +95,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(newUser);
       
       // Redirect based on role
-      if (newUser.role === 'theater_owner') {
-        router.push('/theater/dashboard');
+      if (newUser.role === 'admin') {
+        router.push('/admin/theaters');
+      } else if (newUser.role === 'theater_owner') {
+        router.push('/theaters');
       } else {
         router.push('/');
       }

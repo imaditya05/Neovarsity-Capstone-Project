@@ -13,11 +13,11 @@ const {
   updateTheaterStatus,
   getTheaterStats
 } = require('../controllers/theaterController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, optionalAuth } = require('../middleware/auth');
 
-// Public routes
-router.get('/', getAllTheaters);
-router.get('/:id', getTheaterById);
+// Public routes (but with optional auth to identify user role)
+router.get('/', optionalAuth, getAllTheaters);
+router.get('/:id', optionalAuth, getTheaterById);
 
 // Protected routes - Theater Owner and Admin only
 router.post('/', protect, authorize('theater_owner', 'admin'), createTheater);
