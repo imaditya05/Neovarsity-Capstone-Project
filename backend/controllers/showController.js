@@ -19,8 +19,14 @@ exports.getAllShows = async (req, res) => {
       limit = 20
     } = req.query;
 
-    // Build query
-    const query = { isActive: true };
+    console.log('getAllShows called with query:', req.query);
+
+    // Build query - also ensure movie and theater are not null
+    const query = { 
+      isActive: true,
+      movie: { $ne: null, $exists: true },
+      theater: { $ne: null, $exists: true }
+    };
 
     if (movie) query.movie = movie;
     if (theater) query.theater = theater;
@@ -33,10 +39,12 @@ exports.getAllShows = async (req, res) => {
       const endDate = new Date(date);
       endDate.setHours(23, 59, 59, 999);
       query.showDate = { $gte: startDate, $lte: endDate };
-    } else {
-      // By default, only show future shows
-      query.showDate = { $gte: new Date() };
     }
+    // Note: If no date filter, show all shows (past and future) for easier testing
+    // In production, you might want to uncomment the line below:
+    // else { query.showDate = { $gte: new Date() }; }
+
+    console.log('Query built:', JSON.stringify(query));
 
     // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -48,14 +56,37 @@ exports.getAllShows = async (req, res) => {
       sortOptions.showTime = sortOrder;
     }
 
-    // Execute query
-    const shows = await Show.find(query)
-      .populate('movie', 'title posterUrl duration rating language')
-      .populate('theater', 'theaterName address.city address.state')
-      .populate('createdBy', 'name email')
+    console.log('Executing Show.find...');
+
+    // Execute query without populate first to debug
+    const showsRaw = await Show.find(query)
       .sort(sortOptions)
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean(); // Use lean() for plain objects
+
+    console.log(`Found ${showsRaw.length} shows`);
+
+    // Manually populate to catch errors
+    const shows = [];
+    for (const show of showsRaw) {
+      try {
+        const populatedShow = await Show.findById(show._id)
+          .populate('movie', 'title posterUrl duration rating language')
+          .populate('theater', 'theaterName address')
+          .populate('createdBy', 'name email')
+          .lean();
+        
+        if (populatedShow) {
+          shows.push(populatedShow);
+        }
+      } catch (populateError) {
+        console.error(`Error populating show ${show._id}:`, populateError.message);
+        // Skip this show if there's an error
+      }
+    }
+
+    console.log(`Successfully populated ${shows.length} shows`);
 
     // Get total count
     const total = await Show.countDocuments(query);
@@ -70,10 +101,12 @@ exports.getAllShows = async (req, res) => {
     });
   } catch (error) {
     console.error('Get all shows error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Error fetching shows',
-      error: error.message
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
@@ -114,6 +147,9 @@ exports.getShowById = async (req, res) => {
 // @access  Private (Theater Owner, Admin)
 exports.createShow = async (req, res) => {
   try {
+    console.log('Creating show with data:', JSON.stringify(req.body, null, 2));
+    console.log('User:', req.user.email, 'Role:', req.user.role);
+    
     const {
       movie,
       theater,
@@ -187,9 +223,21 @@ exports.createShow = async (req, res) => {
       createdBy: req.user._id
     });
 
-    const populatedShow = await Show.findById(show._id)
-      .populate('movie', 'title posterUrl duration')
-      .populate('theater', 'theaterName address');
+    console.log('Show created successfully with ID:', show._id);
+
+    // Try to populate, but if it fails, return the basic show
+    let populatedShow;
+    try {
+      populatedShow = await Show.findById(show._id)
+        .populate('movie', 'title posterUrl duration')
+        .populate('theater', 'theaterName address')
+        .lean();
+      console.log('Show populated successfully');
+    } catch (populateError) {
+      console.error('Error populating show:', populateError.message);
+      // If populate fails, return the show without population
+      populatedShow = show.toObject();
+    }
 
     res.status(201).json({
       success: true,
@@ -198,10 +246,23 @@ exports.createShow = async (req, res) => {
     });
   } catch (error) {
     console.error('Create show error:', error);
+    
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: messages,
+        details: error.message
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Error creating show',
-      error: error.message
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

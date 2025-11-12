@@ -70,18 +70,31 @@ export default function MoviesPage() {
             </Link>
           </div>
           <nav className="flex items-center gap-4">
-            {isAuthenticated && user && (
-              <span className="text-sm text-muted-foreground">
-                {user.name}
-              </span>
-            )}
             <Link href="/">
-              <Button variant="outline" size="sm">Home</Button>
+              <Button variant="ghost" size="sm">Home</Button>
             </Link>
-            {canAddMovie && (
-              <Link href="/movies/add">
-                <Button size="sm">Add Movie</Button>
-              </Link>
+            <Link href="/theaters">
+              <Button variant="ghost" size="sm">Theaters</Button>
+            </Link>
+            <Link href="/shows">
+              <Button variant="ghost" size="sm">Shows</Button>
+            </Link>
+            {isAuthenticated && user && (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  {user.name}
+                </span>
+                {canAddMovie && (
+                  <>
+                    <Link href="/movies/add">
+                      <Button variant="outline" size="sm">Add Movie</Button>
+                    </Link>
+                    <Link href="/shows/add">
+                      <Button size="sm">Add Show</Button>
+                    </Link>
+                  </>
+                )}
+              </>
             )}
           </nav>
         </div>

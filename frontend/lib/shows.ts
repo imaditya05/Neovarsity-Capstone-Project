@@ -156,31 +156,31 @@ export const getAllShows = async (params?: {
   page?: number;
   limit?: number;
 }): Promise<ShowsResponse> => {
-  const response = await api.get('/shows', { params });
+  const response = await api.get('/api/shows', { params });
   return response.data;
 };
 
 // Get single show by ID
 export const getShowById = async (id: string): Promise<ShowResponse> => {
-  const response = await api.get(`/shows/${id}`);
+  const response = await api.get(`/api/shows/${id}`);
   return response.data;
 };
 
 // Create new show
 export const createShow = async (data: ShowFormData): Promise<ShowResponse> => {
-  const response = await api.post('/shows', data);
+  const response = await api.post('/api/shows', data);
   return response.data;
 };
 
 // Update show
 export const updateShow = async (id: string, data: Partial<ShowFormData>): Promise<ShowResponse> => {
-  const response = await api.put(`/shows/${id}`, data);
+  const response = await api.put(`/api/shows/${id}`, data);
   return response.data;
 };
 
 // Delete show
 export const deleteShow = async (id: string): Promise<{ success: boolean; message: string }> => {
-  const response = await api.delete(`/shows/${id}`);
+  const response = await api.delete(`/api/shows/${id}`);
   return response.data;
 };
 
@@ -189,7 +189,7 @@ export const getShowsByMovie = async (
   movieId: string,
   params?: { date?: string; theater?: string; city?: string }
 ): Promise<ShowsResponse> => {
-  const response = await api.get(`/shows/movie/${movieId}`, { params });
+  const response = await api.get(`/api/shows/movie/${movieId}`, { params });
   return response.data;
 };
 
@@ -198,25 +198,25 @@ export const getShowsByTheater = async (
   theaterId: string,
   params?: { date?: string }
 ): Promise<ShowsResponse> => {
-  const response = await api.get(`/shows/theater/${theaterId}`, { params });
+  const response = await api.get(`/api/shows/theater/${theaterId}`, { params });
   return response.data;
 };
 
 // Get my shows (for theater owners)
 export const getMyShows = async (): Promise<ShowsResponse> => {
-  const response = await api.get('/shows/my/shows');
+  const response = await api.get('/api/shows/my/shows');
   return response.data;
 };
 
 // Get show seat availability
 export const getShowSeats = async (showId: string): Promise<ShowSeatsResponse> => {
-  const response = await api.get(`/shows/${showId}/seats`);
+  const response = await api.get(`/api/shows/${showId}/seats`);
   return response.data;
 };
 
 // Get show statistics (admin only)
 export const getShowStats = async (): Promise<ShowStatsResponse> => {
-  const response = await api.get('/shows/admin/stats');
+  const response = await api.get('/api/shows/admin/stats');
   return response.data;
 };
 

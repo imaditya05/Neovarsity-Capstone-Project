@@ -54,23 +54,30 @@ export default function TheatersPage() {
             </Link>
           </div>
           <nav className="flex items-center gap-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm">Home</Button>
+            </Link>
             <Link href="/movies">
               <Button variant="ghost" size="sm">Movies</Button>
             </Link>
-            <Link href="/theaters">
-              <Button variant="ghost" size="sm">Theaters</Button>
+            <Link href="/shows">
+              <Button variant="ghost" size="sm">Shows</Button>
             </Link>
-            {canAddTheater && (
-              <Link href="/theaters/add">
-                <Button size="sm">Add Theater</Button>
-              </Link>
-            )}
             {isAuthenticated && user && (
-              <span className="text-sm text-muted-foreground">{user.name}</span>
+              <>
+                <span className="text-sm text-muted-foreground">{user.name}</span>
+                {canAddTheater && (
+                  <>
+                    <Link href="/theaters/add">
+                      <Button variant="outline" size="sm">Add Theater</Button>
+                    </Link>
+                    <Link href="/shows/add">
+                      <Button size="sm">Add Show</Button>
+                    </Link>
+                  </>
+                )}
+              </>
             )}
-            <Link href="/">
-              <Button variant="outline" size="sm">Home</Button>
-            </Link>
           </nav>
         </div>
       </header>

@@ -25,6 +25,9 @@ export default function Home() {
             <Link href="/theaters">
               <Button variant="ghost" size="sm">Theaters</Button>
             </Link>
+            <Link href="/shows">
+              <Button variant="ghost" size="sm">Shows</Button>
+            </Link>
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-muted-foreground">
@@ -36,9 +39,14 @@ export default function Home() {
                   )}
                 </span>
                 {(user?.role === 'theater_owner' || user?.role === 'admin') && (
-                  <Link href="/movies/add">
-                    <Button size="sm">Add Movie</Button>
-                  </Link>
+                  <>
+                    <Link href="/movies/add">
+                      <Button variant="outline" size="sm">Add Movie</Button>
+                    </Link>
+                    <Link href="/shows/add">
+                      <Button size="sm">Add Show</Button>
+                    </Link>
+                  </>
                 )}
                 <Button variant="outline" size="sm" onClick={logout}>
                   Logout

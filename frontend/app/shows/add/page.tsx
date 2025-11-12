@@ -164,12 +164,28 @@ export default function AddShowPage() {
       {/* Header */}
       <header className="border-b bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/shows">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Shows
-            </Button>
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-2xl">🎬</span>
+              <h1 className="text-xl font-bold">Movie Booking</h1>
+            </Link>
+            <nav className="flex items-center gap-4">
+              <Link href="/movies">
+                <Button variant="ghost" size="sm">Movies</Button>
+              </Link>
+              <Link href="/theaters">
+                <Button variant="ghost" size="sm">Theaters</Button>
+              </Link>
+              <Link href="/shows">
+                <Button variant="ghost" size="sm">Shows</Button>
+              </Link>
+              {user && (
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {user.name}
+                </span>
+              )}
+            </nav>
+          </div>
         </div>
       </header>
 

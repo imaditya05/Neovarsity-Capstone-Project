@@ -20,7 +20,7 @@ export default function ShowsPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     movie: '',
-    date: new Date().toISOString().split('T')[0],
+    date: '', // Empty to show all shows initially
     format: ''
   });
 
@@ -39,10 +39,14 @@ export default function ShowsPage() {
       if (filters.date) params.date = filters.date;
       if (filters.format) params.format = filters.format;
       
+      console.log('Fetching shows with params:', params);
       const response = await getAllShows(params);
+      console.log('Shows response:', response);
       setShows(response.data as Show[]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching shows:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error message:', error.message);
     } finally {
       setLoading(false);
     }
@@ -82,18 +86,35 @@ export default function ShowsPage() {
       <header className="border-b bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Movie Shows</h1>
-              <p className="text-sm text-muted-foreground">Find and book your favorite movies</p>
-            </div>
-            {user && (user.role === 'theater_owner' || user.role === 'admin') && (
-              <Link href="/shows/add">
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Show
-                </Button>
+            <div className="flex items-center gap-8">
+              <Link href="/" className="flex items-center gap-2">
+                <span className="text-2xl">🎬</span>
+                <h1 className="text-xl font-bold">Movie Booking</h1>
               </Link>
-            )}
+              <nav className="hidden md:flex items-center gap-4">
+                <Link href="/movies">
+                  <Button variant="ghost" size="sm">Movies</Button>
+                </Link>
+                <Link href="/theaters">
+                  <Button variant="ghost" size="sm">Theaters</Button>
+                </Link>
+              </nav>
+            </div>
+            <div className="flex items-center gap-3">
+              {user && (
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {user.name}
+                </span>
+              )}
+              {user && (user.role === 'theater_owner' || user.role === 'admin') && (
+                <Link href="/shows/add">
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Show
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -109,7 +130,6 @@ export default function ShowsPage() {
                   <SelectValue placeholder="All Movies" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Movies</SelectItem>
                   {movies.map((movie) => (
                     <SelectItem key={movie._id} value={movie._id}>
                       {movie.title}
@@ -117,13 +137,21 @@ export default function ShowsPage() {
                   ))}
                 </SelectContent>
               </Select>
+              {filters.movie && (
+                <button
+                  onClick={() => setFilters({ ...filters, movie: '' })}
+                  className="text-xs text-muted-foreground hover:text-foreground mt-1"
+                >
+                  Clear filter
+                </button>
+              )}
             </div>
 
             {/* Date Filter */}
             <div>
               <Select value={filters.date} onValueChange={(value) => setFilters({ ...filters, date: value })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Date" />
+                  <SelectValue placeholder="All Dates" />
                 </SelectTrigger>
                 <SelectContent>
                   {dates.map((day) => (
@@ -133,6 +161,14 @@ export default function ShowsPage() {
                   ))}
                 </SelectContent>
               </Select>
+              {filters.date && (
+                <button
+                  onClick={() => setFilters({ ...filters, date: '' })}
+                  className="text-xs text-muted-foreground hover:text-foreground mt-1"
+                >
+                  Clear filter
+                </button>
+              )}
             </div>
 
             {/* Format Filter */}
@@ -142,7 +178,6 @@ export default function ShowsPage() {
                   <SelectValue placeholder="All Formats" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Formats</SelectItem>
                   <SelectItem value="2D">2D</SelectItem>
                   <SelectItem value="3D">3D</SelectItem>
                   <SelectItem value="IMAX">IMAX</SelectItem>
@@ -150,6 +185,14 @@ export default function ShowsPage() {
                   <SelectItem value="Dolby Atmos">Dolby Atmos</SelectItem>
                 </SelectContent>
               </Select>
+              {filters.format && (
+                <button
+                  onClick={() => setFilters({ ...filters, format: '' })}
+                  className="text-xs text-muted-foreground hover:text-foreground mt-1"
+                >
+                  Clear filter
+                </button>
+              )}
             </div>
           </div>
         </div>
