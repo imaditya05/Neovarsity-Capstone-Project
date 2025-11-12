@@ -112,7 +112,8 @@ const movieSchema = new mongoose.Schema({
 });
 
 // Index for faster searches
-movieSchema.index({ title: 'text', description: 'text' });
+// Use 'none' for language_override to prevent MongoDB from using the 'language' field for text search
+movieSchema.index({ title: 'text', description: 'text' }, { default_language: 'english', language_override: 'none' });
 movieSchema.index({ genre: 1 });
 movieSchema.index({ status: 1 });
 movieSchema.index({ releaseDate: -1 });

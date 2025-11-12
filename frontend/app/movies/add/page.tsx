@@ -264,7 +264,6 @@ export default function AddMoviePage() {
                         <SelectValue placeholder="Select theater" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
                         {theaters.map((theater) => (
                           <SelectItem key={theater._id} value={theater._id}>
                             {theater.theaterName} - {theater.address.city}
