@@ -30,7 +30,10 @@ export default function Home() {
             </Link>
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-muted-foreground">
+                <Link href="/bookings">
+                  <Button variant="ghost" size="sm">My Bookings</Button>
+                </Link>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
                   Welcome, <span className="font-medium text-foreground">{user?.name}</span>
                   {user?.role && (
                     <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">

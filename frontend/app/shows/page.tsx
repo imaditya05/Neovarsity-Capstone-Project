@@ -98,6 +98,11 @@ export default function ShowsPage() {
                 <Link href="/theaters">
                   <Button variant="ghost" size="sm">Theaters</Button>
                 </Link>
+                {user && (
+                  <Link href="/bookings">
+                    <Button variant="ghost" size="sm">My Bookings</Button>
+                  </Link>
+                )}
               </nav>
             </div>
             <div className="flex items-center gap-3">

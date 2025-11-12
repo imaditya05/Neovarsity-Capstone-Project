@@ -81,7 +81,10 @@ export default function MoviesPage() {
             </Link>
             {isAuthenticated && user && (
               <>
-                <span className="text-sm text-muted-foreground">
+                <Link href="/bookings">
+                  <Button variant="ghost" size="sm">My Bookings</Button>
+                </Link>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
                   {user.name}
                 </span>
                 {canAddMovie && (
