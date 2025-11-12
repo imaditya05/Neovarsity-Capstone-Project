@@ -39,11 +39,13 @@ app.get('/api/health', (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const theaterRoutes = require('./routes/theaterRoutes');
+const showRoutes = require('./routes/showRoutes');
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/theaters', theaterRoutes);
+app.use('/api/shows', showRoutes);
 // app.use('/api/bookings', bookingRoutes);
 
 // Error handling middleware
