@@ -68,7 +68,16 @@ export default function SeatSelectionPage() {
     } else if (selectedSeats.includes(seat.seatNumber)) {
       return 'bg-green-500 hover:bg-green-600 cursor-pointer';
     } else {
-      return 'bg-blue-500 hover:bg-blue-600 cursor-pointer';
+      // Color code by category
+      const category = seat.category?.toLowerCase() || 'standard';
+      if (category.includes('premium') || category.includes('vip')) {
+        return 'bg-purple-500 hover:bg-purple-600 cursor-pointer';
+      } else if (category.includes('economy') || category.includes('budget')) {
+        return 'bg-blue-500 hover:bg-blue-600 cursor-pointer';
+      } else {
+        // Standard/Regular
+        return 'bg-cyan-500 hover:bg-cyan-600 cursor-pointer';
+      }
     }
   };
 
@@ -177,19 +186,37 @@ export default function SeatSelectionPage() {
                   <p className="text-center text-sm text-muted-foreground">Screen</p>
                 </div>
 
-                {/* Legend */}
-                <div className="flex gap-6 justify-center mb-6 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-blue-500 rounded"></div>
-                    <span className="text-sm">Available</span>
+                {/* Legend with Pricing */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-center mb-3">Seat Categories & Pricing</h3>
+                  <div className="flex gap-4 justify-center flex-wrap">
+                    {show.seatLayout.categories.map((category, index) => {
+                      const categoryName = category.name.toLowerCase();
+                      let colorClass = 'bg-cyan-500';
+                      if (categoryName.includes('premium') || categoryName.includes('vip')) {
+                        colorClass = 'bg-purple-500';
+                      } else if (categoryName.includes('economy') || categoryName.includes('budget')) {
+                        colorClass = 'bg-blue-500';
+                      }
+                      
+                      return (
+                        <div key={index} className="flex items-center gap-2">
+                          <div className={`w-6 h-6 ${colorClass} rounded`}></div>
+                          <span className="text-sm font-medium">{category.name}</span>
+                          <span className="text-sm text-primary font-bold">₹{category.price}</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-green-500 rounded"></div>
-                    <span className="text-sm">Selected</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-gray-400 rounded"></div>
-                    <span className="text-sm">Booked</span>
+                  <div className="flex gap-4 justify-center mt-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-green-500 rounded"></div>
+                      <span className="text-xs">Selected</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                      <span className="text-xs">Booked</span>
+                    </div>
                   </div>
                 </div>
 
@@ -205,7 +232,7 @@ export default function SeatSelectionPage() {
                             onClick={() => !seat.isBooked && toggleSeat(seat.seatNumber)}
                             disabled={seat.isBooked}
                             className={`w-8 h-8 text-xs font-semibold rounded transition-colors ${getSeatClass(seat)}`}
-                            title={`${seat.seatNumber} - ${seat.category} - ₹${seat.price}`}
+                            title={seat.isBooked ? `${seat.seatNumber} - Booked` : `${seat.seatNumber} - ${seat.category} - ₹${seat.price}`}
                           >
                             {seat.seatNumber.substring(1)}
                           </button>
@@ -213,19 +240,6 @@ export default function SeatSelectionPage() {
                       </div>
                     </div>
                   ))}
-                </div>
-
-                {/* Category Info */}
-                <div className="mt-6 pt-6 border-t">
-                  <h3 className="font-semibold mb-3">Seat Categories</h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    {show.seatLayout.categories.map((category, index) => (
-                      <div key={index} className="text-center p-3 border rounded-lg">
-                        <p className="font-medium text-sm">{category.name}</p>
-                        <p className="text-lg font-bold text-primary">₹{category.price}</p>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -278,11 +292,14 @@ export default function SeatSelectionPage() {
                   <div className="border-t pt-4">
                     <h3 className="font-semibold mb-2">Selected Seats</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedSeats.map(seatNumber => (
-                        <Badge key={seatNumber} variant="default">
-                          {seatNumber}
-                        </Badge>
-                      ))}
+                      {selectedSeats.map(seatNumber => {
+                        const seat = seats.find(s => s.seatNumber === seatNumber);
+                        return (
+                          <Badge key={seatNumber} variant="default" title={seat ? `${seat.category} - ₹${seat.price}` : seatNumber}>
+                            {seatNumber}
+                          </Badge>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -290,16 +307,38 @@ export default function SeatSelectionPage() {
                 {/* Price Breakdown */}
                 {selectedSeats.length > 0 && (
                   <div className="border-t pt-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Subtotal ({selectedSeats.length} seats)</span>
-                      <span>₹{subtotal}</span>
+                    <h3 className="font-semibold mb-2 text-sm">Price Breakdown</h3>
+                    {/* Group selected seats by category */}
+                    {(() => {
+                      const seatsByCategory: { [key: string]: { count: number; price: number; total: number } } = {};
+                      selectedSeats.forEach(seatNumber => {
+                        const seat = seats.find(s => s.seatNumber === seatNumber);
+                        if (seat) {
+                          if (!seatsByCategory[seat.category]) {
+                            seatsByCategory[seat.category] = { count: 0, price: seat.price, total: 0 };
+                          }
+                          seatsByCategory[seat.category].count++;
+                          seatsByCategory[seat.category].total += seat.price;
+                        }
+                      });
+                      
+                      return Object.entries(seatsByCategory).map(([category, data]) => (
+                        <div key={category} className="flex justify-between text-sm">
+                          <span>{category} × {data.count}</span>
+                          <span>₹{data.total}</span>
+                        </div>
+                      ));
+                    })()}
+                    <div className="flex justify-between text-sm border-t pt-2">
+                      <span className="font-medium">Subtotal</span>
+                      <span className="font-medium">₹{subtotal}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Convenience Fee</span>
                       <span>₹{convenienceFee}</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg border-t pt-2">
-                      <span>Total</span>
+                      <span>Total Amount</span>
                       <span className="text-primary">₹{total}</span>
                     </div>
                   </div>
