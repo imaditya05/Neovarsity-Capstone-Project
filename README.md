@@ -1,321 +1,383 @@
 # 🎬 Movie Booking Application
 
-A full-stack movie booking application with role-based authentication built with Next.js and Node.js.
+A full-stack movie booking platform with role-based authentication, theater management, seat selection, and Razorpay payment integration.
 
 ## 🚀 Tech Stack
 
-### Frontend
-- **Next.js 15** - React framework with App Router
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Beautiful UI components
-- **Axios** - HTTP client for API calls
+**Frontend:** Next.js 15, TypeScript, Tailwind CSS, shadcn/ui  
+**Backend:** Node.js, Express, MongoDB, Mongoose  
+**Authentication:** JWT, bcryptjs  
+**Payment:** Razorpay  
+**Deployment:** Google Cloud Run, Docker
 
-### Backend
-- **Node.js** - JavaScript runtime
-- **Express** - Web application framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB object modeling
-- **JWT** - JSON Web Tokens for authentication
-- **bcryptjs** - Password hashing
+## ✨ Features
 
-## 👥 User Roles
+### 🔐 Authentication & Authorization
+- Multi-role system: User, Theater Owner, Admin
+- JWT-based secure authentication
+- Role-based access control
+- Protected routes and API endpoints
 
-The application supports three levels of access:
+### 🎭 Theater Management
+- Theater owners can create and manage theaters
+- Screen and seat layout configuration
+- Admin approval workflow (pending → approved/rejected)
+- Multi-screen support with custom seat categories
 
-1. **User** - Book movie tickets, view bookings
-2. **Theater Owner** - Manage theaters, add movies and showtimes
-3. **Admin** - Super admin access to manage everything
+### 🎬 Movie Management
+- Add, edit, delete movies
+- Rich movie details (cast, crew, genres, ratings)
+- Movie search and filtering
+- Image uploads and trailers
+
+### 🎟️ Showtime Management
+- Create shows with date, time, and format (2D/3D/IMAX)
+- Link movies to theaters and screens
+- Seat availability tracking
+- Dynamic pricing by seat category
+
+### 💺 Booking System
+- Interactive seat selection UI
+- Real-time seat availability
+- Multiple seat categories (Regular, Premium, VIP)
+- Booking confirmation with unique booking numbers
+- Booking history and cancellation
+
+### 💳 Payment Integration
+- Razorpay payment gateway integration
+- Secure payment verification
+- Payment status tracking
+- Refund support for cancellations
+
+### 👨‍💼 Admin Dashboard
+- Approve/reject theaters
+- Manage all content
+- View statistics and analytics
+- User management
 
 ## 📁 Project Structure
 
 ```
 capstone_project/
-├── frontend/              # Next.js frontend application
-│   ├── app/              # App Router pages
-│   │   ├── login/        # Login page
-│   │   ├── signup/       # Signup page
-│   │   └── page.tsx      # Home page
-│   ├── components/       # React components
-│   │   └── ui/          # shadcn/ui components
-│   ├── contexts/         # React contexts
-│   │   └── AuthContext.tsx
-│   ├── lib/             # Utilities and API clients
-│   │   ├── api.ts
-│   │   ├── auth.ts
-│   │   └── utils.ts
-│   └── package.json
+├── backend/
+│   ├── config/          # Database configuration
+│   ├── controllers/     # Request handlers
+│   ├── models/          # MongoDB schemas
+│   ├── middleware/      # Auth & validation
+│   ├── routes/          # API routes
+│   ├── utils/           # Helper functions
+│   └── server.js        # Entry point
 │
-└── backend/              # Node.js backend API
-    ├── config/           # Configuration files
-    │   └── database.js   # MongoDB connection
-    ├── controllers/      # Request handlers
-    │   └── authController.js
-    ├── models/           # Database models
-    │   └── User.js
-    ├── middleware/       # Custom middleware
-    │   └── auth.js
-    ├── routes/           # API routes
-    │   └── authRoutes.js
-    ├── utils/            # Utility functions
-    │   └── generateToken.js
-    ├── server.js         # Main server file
-    └── package.json
+├── frontend/
+│   ├── app/            # Next.js pages
+│   ├── components/     # React components
+│   ├── contexts/       # React contexts
+│   └── lib/           # API utilities
+│
+└── README.md
 ```
 
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
-- MongoDB (local or MongoDB Atlas)
+- Node.js (v18+)
+- MongoDB (local or Atlas)
+- Razorpay account (for payments)
 
-### 1. Clone the Repository
+### 1. Clone & Install
 
 ```bash
-cd capstone_project
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
 ```
 
-### 2. Backend Setup
+### 2. Configure Backend
 
+Create `backend/.env`:
+
+```env
+PORT=5001
+NODE_ENV=development
+MONGODB_URI=mongodb://localhost:27017/movie_booking
+JWT_SECRET=your_super_secret_jwt_key
+JWT_EXPIRE=7d
+FRONTEND_URL=http://localhost:3000
+
+# Razorpay credentials
+RAZORPAY_KEY_ID=rzp_test_XXXXX
+RAZORPAY_KEY_SECRET=YYYYY
+```
+
+### 3. Configure Frontend
+
+Create `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5001
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_XXXXX
+```
+
+### 4. Start Servers
+
+**Backend:**
 ```bash
 cd backend
-
-# Install dependencies
-npm install
-
-# Create .env file (already created, update if needed)
-# Add your MongoDB connection string and JWT secret
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/movie_booking
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
-JWT_EXPIRE=7d
-FRONTEND_URL=http://localhost:3000
-
-# Start MongoDB (if using local)
-# For Mac: brew services start mongodb-community
-# For Windows: net start MongoDB
-# For Linux: sudo systemctl start mongod
-
-# Run the backend server
 npm run dev
+# Runs on http://localhost:5001
 ```
 
-The backend will be available at [http://localhost:5000](http://localhost:5000)
-
-### 3. Frontend Setup
-
+**Frontend:**
 ```bash
 cd frontend
-
-# Install dependencies
-npm install
-
-# The .env.local file is already created
-# Update if needed:
-NEXT_PUBLIC_API_URL=http://localhost:5000
-
-# Run the frontend server
 npm run dev
+# Runs on http://localhost:3000
 ```
 
-The frontend will be available at [http://localhost:3000](http://localhost:3000)
+## 👥 User Roles & Workflows
 
-## 📝 API Endpoints
+### Regular User
+1. Browse movies and theaters
+2. Select showtime
+3. Choose seats on interactive seat map
+4. Complete payment via Razorpay
+5. Receive booking confirmation
+6. View booking history
+
+### Theater Owner
+1. Create and manage theaters
+2. Add screens with seat layouts
+3. Add movies
+4. Create showtimes
+5. View bookings for their theaters
+6. Wait for admin approval on new theaters
+
+### Admin
+1. Approve/reject theaters
+2. Manage all movies and theaters
+3. View system statistics
+4. Full access to all features
+
+## 🔌 API Endpoints
 
 ### Authentication
-
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/api/auth/register` | Register a new user | Public |
-| POST | `/api/auth/login` | Login user | Public |
-| GET | `/api/auth/me` | Get current user profile | Private |
-| PUT | `/api/auth/profile` | Update user profile | Private |
-
-### Request Examples
-
-#### Register User
-```bash
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "role": "user",
-  "phone": "1234567890"
-}
+```
+POST   /api/auth/register       - Register user
+POST   /api/auth/login          - Login
+GET    /api/auth/me             - Get current user
+PUT    /api/auth/profile        - Update profile
 ```
 
-#### Register Theater Owner
-```bash
-POST http://localhost:5000/api/auth/register
-Content-Type: application/json
-
-{
-  "name": "Theater Owner",
-  "email": "owner@example.com",
-  "password": "password123",
-  "role": "theater_owner",
-  "phone": "1234567890",
-  "theaterDetails": {
-    "theaterName": "Cinema Palace",
-    "address": "123 Main Street",
-    "city": "Mumbai",
-    "state": "Maharashtra",
-    "licenseNumber": "LIC123456"
-  }
-}
+### Movies
+```
+GET    /api/movies              - List all movies
+GET    /api/movies/:id          - Movie details
+POST   /api/movies              - Create movie (Theater Owner/Admin)
+PUT    /api/movies/:id          - Update movie
+DELETE /api/movies/:id          - Delete movie
 ```
 
-#### Login
-```bash
-POST http://localhost:5000/api/auth/login
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
+### Theaters
+```
+GET    /api/theaters            - List theaters
+GET    /api/theaters/:id        - Theater details
+POST   /api/theaters            - Create theater
+PUT    /api/theaters/:id/status - Approve/reject (Admin)
 ```
 
-## 🎨 Frontend Features
+### Shows
+```
+GET    /api/shows               - List shows
+GET    /api/shows/:id           - Show details
+GET    /api/shows/:id/seats     - Seat availability
+POST   /api/shows               - Create show
+```
 
-### Authentication Pages
-- **Login Page** (`/login`) - User authentication with email and password
-- **Signup Page** (`/signup`) - User registration with role selection
-  - Regular user signup
-  - Theater owner signup with theater details
-- **Home Page** (`/`) - Landing page with features overview
+### Bookings
+```
+POST   /api/bookings            - Create booking
+GET    /api/bookings/my-bookings - User's bookings
+PUT    /api/bookings/:id/cancel  - Cancel booking
+```
 
-### Components
-- Built with **shadcn/ui** for consistent, beautiful UI
-- Responsive design for all screen sizes
+### Payments
+```
+GET    /api/payments/key         - Get Razorpay key
+POST   /api/payments/create-order - Create payment order
+POST   /api/payments/verify      - Verify payment signature
+```
+
+## 💳 Payment Setup
+
+### Razorpay Test Mode
+
+1. Sign up at [razorpay.com](https://razorpay.com)
+2. Get test API keys from dashboard
+3. Add to `.env` files (backend and frontend)
+4. Use test cards for testing:
+   - Card: `4111 1111 1111 1111`
+   - CVV: Any 3 digits
+   - Expiry: Any future date
+
+### Payment Flow
+1. User selects seats → Creates booking (pending)
+2. Razorpay order created
+3. Checkout modal opens
+4. User completes payment
+5. Backend verifies payment signature
+6. Booking updated (completed)
+7. Seats marked as booked
+
+## 🚢 Deployment (Google Cloud Run)
+
+### Backend Deployment
+```bash
+cd backend
+docker build -t gcr.io/YOUR_PROJECT_ID/backend:latest .
+docker push gcr.io/YOUR_PROJECT_ID/backend:latest
+gcloud run deploy backend \
+  --image gcr.io/YOUR_PROJECT_ID/backend:latest \
+  --platform managed \
+  --region asia-south1 \
+  --allow-unauthenticated \
+  --port 8080
+```
+
+### Frontend Deployment
+```bash
+cd frontend
+docker build \
+  --build-arg NEXT_PUBLIC_API_URL=https://backend-xxx.run.app \
+  --build-arg NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxx \
+  -t gcr.io/YOUR_PROJECT_ID/frontend:latest .
+docker push gcr.io/YOUR_PROJECT_ID/frontend:latest
+gcloud run deploy frontend \
+  --image gcr.io/YOUR_PROJECT_ID/frontend:latest \
+  --platform managed \
+  --region asia-south1 \
+  --allow-unauthenticated
+```
+
+**Important:** Set environment variables in Cloud Run console for sensitive data.
+
+## 🧪 Testing
+
+### Test as Theater Owner
+1. Register as theater owner
+2. Create a theater (status: pending)
+3. Admin approves theater
+4. Add a movie
+5. Create showtime for the movie
+6. Theater is now bookable
+
+### Test as User
+1. Browse shows
+2. Select a show
+3. Choose seats on seat map
+4. Complete payment (use test card)
+5. View booking confirmation
+6. Check "My Bookings"
+
+### Test Cancellation
+1. Go to "My Bookings"
+2. Cancel a future booking
+3. Refund calculated based on timing
+4. Seats released for rebooking
+
+## 🎯 Key Features in Detail
+
+### Seat Selection System
+- Visual seat map with rows and columns
+- Color coding: Blue (available), Green (selected), Gray (booked)
+- Real-time seat availability
+- Maximum 10 seats per booking
+- Category-based pricing
+
+### Booking Workflow
+- Status flow: pending → completed/cancelled
+- Unique booking numbers (BK-YYYYMMDD-XXXX)
+- Refund policy:
+  - 3+ days before: 100% refund
+  - < 2 hours: No cancellation allowed
+
+### Theater Approval System
+- New theaters start as "pending"
+- Admin reviews and approves/rejects
+- Only approved theaters visible to public
+- Theater owners see their own theaters regardless of status
+
+## 🔒 Security Features
+
+- Password hashing with bcryptjs
+- JWT token authentication
+- Role-based access control
+- Protected API routes
+- Payment signature verification
+- Input validation and sanitization
+- CORS configuration
+
+## 📊 Database Models
+
+**User:** name, email, password, role, phone, theaterDetails  
+**Movie:** title, genre, language, duration, cast, crew, rating, status  
+**Theater:** name, address, screens, facilities, status, owner  
+**Show:** movie, theater, screen, date, time, seatLayout, pricing  
+**Booking:** user, show, seats, amount, paymentStatus, razorpayDetails
+
+## 🎨 UI/UX Features
+
+- Responsive design (mobile-first)
+- Modern gradient backgrounds
+- Interactive components
+- Loading states and skeletons
+- Error handling with user feedback
+- Toast notifications
 - Dark mode support
 
-## 🔐 Authentication Flow
+## 📝 Environment Variables
 
-1. User registers with role (user/theater_owner)
-2. Backend hashes password and stores user in MongoDB
-3. JWT token is generated and returned
-4. Frontend stores token in localStorage
-5. Token is included in Authorization header for protected routes
-6. Middleware validates token on protected endpoints
+### Backend Required
+- `PORT` - Server port
+- `MONGODB_URI` - Database connection
+- `JWT_SECRET` - Token signing key
+- `RAZORPAY_KEY_ID` - Payment gateway key
+- `RAZORPAY_KEY_SECRET` - Payment gateway secret
 
-## 🗄️ Database Schema
+### Frontend Required
+- `NEXT_PUBLIC_API_URL` - Backend URL
+- `NEXT_PUBLIC_RAZORPAY_KEY_ID` - Public payment key
 
-### User Model
-```javascript
-{
-  name: String,
-  email: String (unique),
-  password: String (hashed),
-  role: String (user | theater_owner | admin),
-  phone: String,
-  isActive: Boolean,
-  theaterDetails: {
-    theaterName: String,
-    address: String,
-    city: String,
-    state: String,
-    licenseNumber: String
-  },
-  timestamps: true
-}
-```
+## 🎓 Admin Credentials (Default)
 
-## 🧪 Testing the Application
+**Email:** admin@moviebooking.com  
+**Password:** admin123
 
-### Using the Web Interface
+⚠️ **Change these immediately in production!**
 
-1. Start both backend and frontend servers
-2. Navigate to [http://localhost:3000](http://localhost:3000)
-3. Click "Sign Up" and create an account
-4. Choose account type (User or Theater Owner)
-5. Login with your credentials
+## 📚 Additional Resources
 
-### Using API Tools (Postman/Thunder Client)
+- [Razorpay Documentation](https://razorpay.com/docs/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [MongoDB Documentation](https://docs.mongodb.com/)
+- [Google Cloud Run](https://cloud.google.com/run/docs)
 
-Test the API endpoints directly:
-```bash
-# Health check
-GET http://localhost:5000/api/health
+## 🎉 Features Summary
 
-# Register
-POST http://localhost:5000/api/auth/register
-
-# Login
-POST http://localhost:5000/api/auth/login
-
-# Get profile (requires token)
-GET http://localhost:5000/api/auth/me
-Authorization: Bearer YOUR_JWT_TOKEN
-```
-
-## 🚀 Available Scripts
-
-### Backend
-- `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
-
-### Frontend
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-
-## 🔧 Environment Variables
-
-### Backend (.env)
-```env
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/movie_booking
-JWT_SECRET=your_jwt_secret_key
-JWT_EXPIRE=7d
-FRONTEND_URL=http://localhost:3000
-```
-
-### Frontend (.env.local)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-
-## 📦 MongoDB Setup Options
-
-### Option 1: Local MongoDB
-```bash
-# Install MongoDB locally and start the service
-# Connection string: mongodb://localhost:27017/movie_booking
-```
-
-### Option 2: MongoDB Atlas (Cloud)
-```bash
-# Create a free cluster at https://www.mongodb.com/cloud/atlas
-# Get your connection string and update MONGODB_URI in .env
-# Example: mongodb+srv://username:password@cluster.mongodb.net/movie_booking
-```
-
-## 🎯 Next Steps
-
-Now that authentication is complete, here are the next features to implement:
-
-- [ ] Movie management (CRUD operations)
-- [ ] Theater management
-- [ ] Showtime scheduling
-- [ ] Seat selection system
-- [ ] Booking management
-- [ ] Payment integration
-- [ ] User dashboard
-- [ ] Admin panel
-- [ ] Email notifications
-- [ ] Search and filters
-
-## 🤝 Contributing
-
-This is a capstone project. Contributions and suggestions are welcome!
+✅ Complete authentication system  
+✅ Multi-role authorization  
+✅ Theater and screen management  
+✅ Movie catalog with search  
+✅ Showtime scheduling  
+✅ Interactive seat selection  
+✅ Payment gateway integration  
+✅ Booking management  
+✅ Admin dashboard  
+✅ Responsive UI  
+✅ Production-ready deployment
 
 ## 📄 License
 
@@ -323,4 +385,4 @@ ISC
 
 ---
 
-**Note:** Make sure MongoDB is running before starting the backend server. The application requires a database connection to function properly.
+**Built with ❤️ as a capstone project**
