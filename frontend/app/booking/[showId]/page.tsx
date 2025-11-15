@@ -140,7 +140,7 @@ export default function SeatSelectionPage() {
         {
           bookingId,
           showId: params.showId as string,
-          userId: user.id
+          userId: user._id || user.id
         }
       );
 
