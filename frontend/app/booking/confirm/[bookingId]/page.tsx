@@ -189,13 +189,40 @@ export default function BookingConfirmationPage() {
                     <span>Total Paid</span>
                     <span className="text-green-600">₹{booking.totalAmount}</span>
                   </div>
-                  <div className="pt-2">
-                    <Badge 
-                      variant="outline"
-                      className={booking.paymentStatus === 'completed' ? 'bg-green-50 text-green-700 border-green-200' : ''}
-                    >
-                      Payment Status: {booking.paymentStatus.toUpperCase()}
-                    </Badge>
+                  <div className="border-t pt-3 mt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">Payment Status</span>
+                      <Badge 
+                        variant="outline"
+                        className={booking.paymentStatus === 'completed' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}
+                      >
+                        {booking.paymentStatus.toUpperCase()}
+                      </Badge>
+                    </div>
+                    {booking.paymentMethod && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Payment Method</span>
+                        <span className="font-medium">{booking.paymentMethod.toUpperCase()}</span>
+                      </div>
+                    )}
+                    {booking.razorpay_payment_id && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Payment ID</span>
+                        <span className="font-mono text-xs">{booking.razorpay_payment_id.substring(0, 20)}...</span>
+                      </div>
+                    )}
+                    {booking.paymentDate && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Payment Date</span>
+                        <span>{new Date(booking.paymentDate).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>

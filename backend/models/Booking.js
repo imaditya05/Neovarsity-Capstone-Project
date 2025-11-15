@@ -85,7 +85,7 @@ const bookingSchema = new mongoose.Schema({
   
   paymentMethod: {
     type: String,
-    enum: ['credit_card', 'debit_card', 'upi', 'wallet', 'cash'],
+    enum: ['credit_card', 'debit_card', 'upi', 'wallet', 'netbanking', 'cash'],
     default: 'cash'
   },
   
@@ -95,6 +95,19 @@ const bookingSchema = new mongoose.Schema({
   
   paymentDate: {
     type: Date
+  },
+  
+  // Razorpay specific fields
+  razorpay_order_id: {
+    type: String
+  },
+  
+  razorpay_payment_id: {
+    type: String
+  },
+  
+  razorpay_signature: {
+    type: String
   },
   
   // Booking status

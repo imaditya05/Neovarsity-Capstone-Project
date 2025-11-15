@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getShowById, getShowSeats, Show, Seat } from '@/lib/shows';
 import { createBooking } from '@/lib/bookings';
+import { 
+  createPaymentOrder, 
+  verifyPayment, 
+  updateBookingPayment,
+  initializeRazorpayPayment,
+  RazorpayResponse 
+} from '@/lib/payments';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -104,22 +111,109 @@ export default function SeatSelectionPage() {
       return;
     }
 
+    if (!show || !user) {
+      setError('Missing show or user information');
+      return;
+    }
+
     setBooking(true);
     setError('');
 
     try {
-      const response = await createBooking({
+      // Step 1: Create booking (with pending payment status)
+      console.log('Creating booking...');
+      const bookingResponse = await createBooking({
         showId: params.showId as string,
         seats: selectedSeats
       });
 
-      // Redirect to booking confirmation
-      router.push(`/booking/confirm/${response.data._id}`);
+      const bookingId = bookingResponse.data._id;
+      const totalAmount = calculateTotal().total;
+
+      console.log('Booking created:', bookingId);
+
+      // Step 2: Create Razorpay order
+      console.log('Creating payment order...');
+      const orderResponse = await createPaymentOrder(
+        totalAmount,
+        bookingId,
+        {
+          bookingId,
+          showId: params.showId as string,
+          userId: user._id || user.id
+        }
+      );
+
+      console.log('Payment order created:', orderResponse.data.orderId);
+
+      // Step 3: Initialize Razorpay payment
+      await initializeRazorpayPayment({
+        amount: orderResponse.data.amount,
+        currency: orderResponse.data.currency,
+        name: 'Movie Booking',
+        description: `Booking for ${show.movie.title}`,
+        order_id: orderResponse.data.orderId,
+        handler: async (response: RazorpayResponse) => {
+          try {
+            console.log('Payment successful, verifying...');
+            
+            // Step 4: Verify payment
+            const verificationResponse = await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+
+            if (verificationResponse.success && verificationResponse.data.verified) {
+              console.log('Payment verified, updating booking...');
+              
+              // Step 5: Update booking with payment details
+              await updateBookingPayment(bookingId, {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                paymentMethod: verificationResponse.data.paymentDetails?.method
+              });
+
+              console.log('Booking payment updated successfully');
+              
+              // Step 6: Redirect to confirmation page
+              router.push(`/booking/confirm/${bookingId}`);
+            } else {
+              setError('Payment verification failed. Please contact support.');
+              setBooking(false);
+            }
+          } catch (err: any) {
+            console.error('Payment verification error:', err);
+            setError('Payment verification failed. Please contact support with your booking ID: ' + bookingId);
+            setBooking(false);
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+          contact: user.phone || ''
+        },
+        notes: {
+          bookingId,
+          showId: params.showId as string
+        },
+        theme: {
+          color: '#3399cc'
+        },
+        modal: {
+          ondismiss: () => {
+            setError('Payment cancelled. Your seats are on hold for 10 minutes.');
+            setBooking(false);
+          }
+        }
+      });
+
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create booking');
+      console.error('Booking error:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to process booking');
       // Refresh seats to get latest availability
       fetchShowDetails();
-    } finally {
       setBooking(false);
     }
   };
@@ -351,15 +445,20 @@ export default function SeatSelectionPage() {
                   </div>
                 )}
 
-                {/* Book Button */}
+                {/* Payment Button */}
                 <Button
                   onClick={handleBooking}
                   disabled={selectedSeats.length === 0 || booking}
                   className="w-full"
                   size="lg"
                 >
-                  {booking ? 'Processing...' : `Book ${selectedSeats.length} Seat${selectedSeats.length !== 1 ? 's' : ''}`}
+                  {booking ? 'Processing...' : selectedSeats.length > 0 ? `Proceed to Pay ₹${calculateTotal().total}` : 'Select Seats'}
                 </Button>
+                {selectedSeats.length > 0 && (
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    You will be redirected to secure payment gateway
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>

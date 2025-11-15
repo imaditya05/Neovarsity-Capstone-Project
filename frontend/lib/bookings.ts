@@ -58,9 +58,12 @@ export interface Booking {
   convenienceFee: number;
   totalAmount: number;
   paymentStatus: 'pending' | 'completed' | 'failed' | 'refunded';
-  paymentMethod: 'credit_card' | 'debit_card' | 'upi' | 'wallet' | 'cash';
+  paymentMethod: 'credit_card' | 'debit_card' | 'upi' | 'wallet' | 'netbanking' | 'cash';
   paymentId?: string;
   paymentDate?: string;
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
   bookingStatus: 'confirmed' | 'cancelled' | 'completed';
   bookingNumber: string;
   qrCode?: string;

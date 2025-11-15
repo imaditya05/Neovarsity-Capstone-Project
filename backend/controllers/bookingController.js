@@ -429,3 +429,77 @@ exports.getBookingStats = async (req, res) => {
   }
 };
 
+// @desc    Update booking payment details
+// @route   PUT /api/bookings/:id/payment
+// @access  Private
+exports.updateBookingPayment = async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      paymentMethod
+    } = req.body;
+
+    console.log('Updating payment for booking:', req.params.id);
+
+    // Get booking
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found'
+      });
+    }
+
+    // Check if user owns this booking
+    if (booking.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this booking'
+      });
+    }
+
+    // Update payment details
+    booking.razorpay_order_id = razorpay_order_id;
+    booking.razorpay_payment_id = razorpay_payment_id;
+    booking.razorpay_signature = razorpay_signature;
+    booking.paymentId = razorpay_payment_id;
+    booking.paymentStatus = 'completed';
+    booking.paymentDate = new Date();
+    booking.paymentMethod = paymentMethod || 'upi';
+
+    await booking.save();
+
+    console.log('Payment details updated successfully');
+
+    // Try to populate booking for response
+    let populatedBooking;
+    try {
+      populatedBooking = await Booking.findById(booking._id)
+        .populate('movie', 'title posterUrl duration rating')
+        .populate('theater', 'theaterName address')
+        .populate('show', 'showDate showTime format screen')
+        .populate('user', 'name email')
+        .lean();
+    } catch (populateError) {
+      console.error('Error populating booking:', populateError.message);
+      populatedBooking = booking.toObject();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment details updated successfully',
+      data: populatedBooking
+    });
+  } catch (error) {
+    console.error('Update booking payment error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating payment details',
+      error: error.message
+    });
+  }
+};
+
