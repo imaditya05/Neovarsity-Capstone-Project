@@ -6,9 +6,6 @@ const connectDB = require('./config/database');
 // Load environment variables
 dotenv.config();
 
-// Connect to database
-connectDB();
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -69,9 +66,15 @@ app.use((req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server on 0.0.0.0 (required for Cloud Run)
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 Listening on 0.0.0.0:${PORT}`);
+  
+  // Connect to database after server starts (non-blocking)
+  connectDB().catch(err => {
+    console.error('Failed to connect to database:', err.message);
+  });
 });
 

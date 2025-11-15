@@ -1,17 +1,33 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Initialize Razorpay instance lazily
+let razorpay = null;
+
+const getRazorpayInstance = () => {
+  if (!razorpay && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+  }
+  return razorpay;
+};
+
+const checkRazorpayConfig = () => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Razorpay credentials not configured');
+  }
+};
 
 // @desc    Create Razorpay order
 // @route   POST /api/payments/create-order
 // @access  Private
 exports.createOrder = async (req, res) => {
   try {
+    checkRazorpayConfig();
+    const razorpayInstance = getRazorpayInstance();
+    
     const { amount, currency = 'INR', receipt, notes } = req.body;
 
     // Validate amount
@@ -34,7 +50,7 @@ exports.createOrder = async (req, res) => {
     console.log('Creating Razorpay order with options:', options);
 
     // Create order
-    const order = await razorpay.orders.create(options);
+    const order = await razorpayInstance.orders.create(options);
 
     console.log('Razorpay order created:', order.id);
 
@@ -96,7 +112,8 @@ exports.verifyPayment = async (req, res) => {
 
       // Fetch payment details from Razorpay
       try {
-        const payment = await razorpay.payments.fetch(razorpay_payment_id);
+        const razorpayInstance = getRazorpayInstance();
+        const payment = await razorpayInstance.payments.fetch(razorpay_payment_id);
 
         res.status(200).json({
           success: true,
@@ -154,11 +171,14 @@ exports.verifyPayment = async (req, res) => {
 // @access  Private
 exports.getPaymentDetails = async (req, res) => {
   try {
+    checkRazorpayConfig();
+    const razorpayInstance = getRazorpayInstance();
+    
     const { paymentId } = req.params;
 
     console.log('Fetching payment details for:', paymentId);
 
-    const payment = await razorpay.payments.fetch(paymentId);
+    const payment = await razorpayInstance.payments.fetch(paymentId);
 
     res.status(200).json({
       success: true,
@@ -189,6 +209,9 @@ exports.getPaymentDetails = async (req, res) => {
 // @access  Private (Admin/Theater Owner)
 exports.refundPayment = async (req, res) => {
   try {
+    checkRazorpayConfig();
+    const razorpayInstance = getRazorpayInstance();
+    
     const { paymentId } = req.params;
     const { amount, notes } = req.body;
 
@@ -206,7 +229,7 @@ exports.refundPayment = async (req, res) => {
       refundOptions.notes = notes;
     }
 
-    const refund = await razorpay.payments.refund(paymentId, refundOptions);
+    const refund = await razorpayInstance.payments.refund(paymentId, refundOptions);
 
     console.log('Refund created:', refund.id);
 
